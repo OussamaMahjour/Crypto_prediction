@@ -1,4 +1,4 @@
 htdfs/data/*/*
-dataset/*
+dataset/dataset.csv
 kibana/*/*
 spark/data_builder/target/
