@@ -1,0 +1,4 @@
+htdfs/data/*/*
+dataset/*
+kibana/*/*
+spark/data_builder/target/
