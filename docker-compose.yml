@@ -83,47 +83,97 @@ services:
 
 
   spark-master:
-      image: bde2020/spark-master:latest
+      image: apache/spark:3.5.4-scala2.12-java17-python3-r-ubuntu
       container_name: spark-master
+      command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
       environment:
         - INIT_DAEMON_STEP=setup_spark
+        - SPARK_MASTER_MEMORY=4g  # Memory for the Spark Master
+        - SPARK_EXECUTOR_MEMORY=2g  # Default executor memory for workers
+        - SPARK_DRIVER_MEMORY=2g
+        - SPARK_SQL_WINDOW_EXEC_BUFFER_SPILL_THRESHOLD=4194304 # Memory for the driver program
+        - SPARK_MEMORY_FRACTION=0.8
+        - SPARK_SQL_INMEMORYCOLUMNARSTORAGE_BATCHSIZE=10000
       ports:
         - "8091:8080" # Spark Web UI
         - "7077:7077" # Spark Master
       networks:
         - app-net
+      volumes:
+        - ./spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       healthcheck:
         test: [ "CMD", "curl", "-f", "http://spark-master:8080" ]
         interval: 10s
         timeout: 5s
         retries: 5
+      deploy:
+        resources:
+          limits:
+            memory: 5g  # Total container memory limit
       depends_on:
         namenode:
           condition: service_healthy
 
 
-  spark-worker:
-      image: bde2020/spark-worker:latest
-      container_name: spark-worker
+  spark-worker1:
+      image: apache/spark:3.5.4-scala2.12-java17-python3-r-ubuntu
+      container_name: spark-worker1
       environment:
         - SPARK_MASTER=spark://spark-master:7077
+        - SPARK_WORKER_MEMORY=4g   # Worker memory
+        - SPARK_EXECUTOR_MEMORY=2g
+        - SPARK_SQL_WINDOW_EXEC_BUFFER_SPILL_THRESHOLD=4194304# Executor memory
+        - SPARK_MEMORY_FRACTION=0.8
+        - SPARK_SQL_INMEMORYCOLUMNARSTORAGE_BATCHSIZE=10000
+
       links:
         - spark-master
+      command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
       networks:
         - app-net
+      volumes:
+        - ./spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      deploy:
+        resources:
+          limits:
+            memory: 5g
       depends_on:
         spark-master:
           condition: service_healthy
-  app:
-    build:
-      context: ./spark/data_builder
-      dockerfile: Dockerfile
-    container_name: spark-app
+  spark-worker2:
+    image: apache/spark:3.5.4-scala2.12-java17-python3-r-ubuntu
+    container_name: spark-worker2
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=4g   # Worker memory
+      - SPARK_EXECUTOR_MEMORY=2g
+      - SPARK_SQL_WINDOW_EXEC_BUFFER_SPILL_THRESHOLD=4194304# Executor memory
+      - SPARK_MEMORY_FRACTION=0.8
+      - SPARK_SQL_INMEMORYCOLUMNARSTORAGE_BATCHSIZE=10000
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    links:
+      - spark-master
+    networks:
+      - app-net
+    volumes:
+      - ./spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    deploy:
+      resources:
+        limits:
+          memory: 5g
     depends_on:
       spark-master:
         condition: service_healthy
-      logstash:
-        condition: service_started
+  app:
+    build:
+      context: spark/cryptoPredictionApp
+      dockerfile: Dockerfile
+    container_name: spark-app
+#    depends_on:
+#      spark-master:
+#        condition: service_healthy
+##      logstash:
+#        condition: service_started
 
     networks:
       - app-net

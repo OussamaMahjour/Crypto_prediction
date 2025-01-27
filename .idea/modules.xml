@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Crypto_Prediction.iml" filepath="$PROJECT_DIR$/.idea/Crypto_Prediction.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spark/cryptoPredictionApp/crypto-app/crypto-app.iml" filepath="$PROJECT_DIR$/spark/cryptoPredictionApp/crypto-app/crypto-app.iml" />
     </modules>
   </component>
 </project>

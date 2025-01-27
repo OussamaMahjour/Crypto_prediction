@@ -3,8 +3,8 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/spark/data_builder/project/target" />
-      <excludeFolder url="file://$MODULE_DIR$/spark/data_builder/target" />
+      <excludeFolder url="file://$MODULE_DIR$/spark/cryptoPredictionApp/project/target" />
+      <excludeFolder url="file://$MODULE_DIR$/spark/cryptoPredictionApp/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
