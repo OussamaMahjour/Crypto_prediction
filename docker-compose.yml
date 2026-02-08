@@ -66,21 +66,6 @@ services:
       namenode:
         condition: service_healthy
 
-  datanode2:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode2
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-    volumes:
-      - ./hdfs/data/datanode2:/hadoop/dfs/data
-      - ./hdfs/config/core-site.xml:/etc/hadoop/core-site.xml
-      - ./hdfs/config/hdfs-site.xml:/etc/hadoop/hdfs-site.xml
-    networks:
-      - app-net
-    depends_on:
-      namenode:
-        condition: service_healthy
-
 
   spark-master:
       image: apache/spark:3.5.4-scala2.12-java17-python3-r-ubuntu
@@ -140,30 +125,7 @@ services:
       depends_on:
         spark-master:
           condition: service_healthy
-  spark-worker2:
-    image: apache/spark:3.5.4-scala2.12-java17-python3-r-ubuntu
-    container_name: spark-worker2
-    environment:
-      - SPARK_MASTER=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=4g   # Worker memory
-      - SPARK_EXECUTOR_MEMORY=2g
-      - SPARK_SQL_WINDOW_EXEC_BUFFER_SPILL_THRESHOLD=4194304# Executor memory
-      - SPARK_MEMORY_FRACTION=0.8
-      - SPARK_SQL_INMEMORYCOLUMNARSTORAGE_BATCHSIZE=10000
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
-    links:
-      - spark-master
-    networks:
-      - app-net
-    volumes:
-      - ./spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
-    deploy:
-      resources:
-        limits:
-          memory: 5g
-    depends_on:
-      spark-master:
-        condition: service_healthy
+ 
   app:
     build:
       context: spark/cryptoPredictionApp
